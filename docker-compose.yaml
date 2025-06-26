@@ -1,0 +1,34 @@
+# nginx proxy address - http://172.17.0.1:59069
+
+name: dockge
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: louislam/dockge:nightly
+    container_name: dockge-app
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      - TZ=${TZ:-America/New_York}
+      - DOCKGE_STACKS_DIR=/opt/stacks
+    ports:
+      - '172.17.0.1:59069:5001'
+    volumes:
+      - './rootfs/data/dockge:/app/data'
+      - './rootfs/config/dockge:/opt/stacks'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '$HOME/.docker/:/root/.docker:ro'
+    networks:
+      - dockge
+
+networks:
+  dockge:
+    name: dockge
+    external: false
