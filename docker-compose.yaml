@@ -21,9 +21,9 @@ services:
     ports:
       - '172.17.0.1:59069:5001'
     volumes:
-      - './rootfs/data/dockge:/app/data'
-      - './rootfs/config/dockge:/opt/stacks'
-      - './rootfs/config/docker:/root/.docker:ro'
+      - './volumes/data/dockge:/app/data'
+      - './volumes/config/dockge:/opt/stacks'
+      - './volumes/config/docker:/root/.docker:ro'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - dockge
