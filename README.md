@@ -45,9 +45,9 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/dockge` - Data storage
-- `./rootfs/config/dockge` - Data storage
-- `./rootfs/config/docker` - Data storage
+- `./volumes/data/dockge` - Data storage
+- `./volumes/config/dockge` - Data storage
+- `./volumes/config/docker` - Data storage
 
 ## 🔍 Logging
 
