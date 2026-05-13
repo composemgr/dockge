@@ -18,6 +18,8 @@ services:
     environment:
       TZ: ${TZ:-America/New_York}
       DOCKGE_STACKS_DIR: /opt/stacks
+      CONTAINER_NAME: dockge-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     ports:
       - "172.17.0.1:59069:5001"
     volumes:
@@ -26,8 +28,30 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - dockge
+      - proxy
+      - cloudflare
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://dockge-app:5001'
+      - 'cloudflare.hostname=dockge.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.dockge-app.entrypoints=http'
+      - 'traefik.http.routers.dockge-app-secure.tls=true'
+      - 'traefik.http.routers.dockge-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.dockge-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.dockge-app.middlewares=dockge-app-https-redirect'
+      - 'traefik.http.routers.dockge-app-secure.entrypoints=https'
+      - 'traefik.http.routers.dockge-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.dockge-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.dockge-app-secure.service=dockge-app'
+      - 'traefik.http.services.dockge-app.loadbalancer.server.port=5001'
 
 networks:
   dockge:
     name: dockge
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
