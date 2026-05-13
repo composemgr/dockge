@@ -2,16 +2,16 @@
 
 name: dockge
 x-logging: &default-logging
-  options:
-    max-size: '5m'
-    max-file: '1'
   driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "1"
 
 services:
   app:
-    image: louislam/dockge:nightly
+    image: louislam/dockge:latest
     container_name: dockge-app
-    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    hostname: ${BASE_HOST_NAME:-localhost}
     restart: always
     pull_policy: always
     logging: *default-logging
@@ -19,12 +19,11 @@ services:
       TZ: ${TZ:-America/New_York}
       DOCKGE_STACKS_DIR: /opt/stacks
     ports:
-      - '172.17.0.1:59069:5001'
+      - "172.17.0.1:59069:5001"
     volumes:
-      - './volumes/data/dockge:/app/data'
-      - './volumes/config/dockge:/opt/stacks'
-      - './volumes/config/docker:/root/.docker:ro'
-      - '/var/run/docker.sock:/var/run/docker.sock'
+      - "./volumes/data/dockge:/app/data"
+      - "./volumes/config/dockge:/opt/stacks"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - dockge
 
