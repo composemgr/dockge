@@ -1,0 +1,48 @@
+name: dockge
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: louislam/dockge:latest
+    container_name: dockge-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: dockge-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      DOCKGE_HOST: ${BASE_HOST_NAME:-$HOSTNAME}
+      PORT: 5001
+    volumes:
+      - './volumes/data/dockge:/app/data:z'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.dockge-app.entrypoints=http'
+      - 'traefik.http.routers.dockge-app.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.dockge-app.middlewares=dockge-app-https-redirect'
+      - 'traefik.http.middlewares.dockge-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.dockge-app-secure.entrypoints=https'
+      - 'traefik.http.routers.dockge-app-secure.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.dockge-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.dockge-app-secure.service=dockge-app'
+      - 'traefik.http.services.dockge-app.loadbalancer.server.port=5001'
+    networks:
+      - dockge
+      - traefik
+
+
+networks:
+  dockge:
+    name: dockge
+    external: false
+  traefik:
+    external: true
